@@ -1,0 +1,4 @@
+ - 下载www.swig.org/download.html
+ - 环境变量SWIG_HOME
+ - PATH ;%SWIG_HOME%
+ - 测试：swig -version
