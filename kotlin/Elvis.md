@@ -7,6 +7,7 @@ fun main(args: Array<String>) {
     if (age?.length?:3 > 100 || age?.length?:3 < 100) {
         println("Hello")
     }
+    println(age?.length ?: 3 - 2) // 优先级无论谁高谁低执行结果都一样
 }
 ```
 运算优先级：(+) 大于 (?:) 大于 (>) 大于 (||)
