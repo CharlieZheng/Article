@@ -4,4 +4,4 @@
 export ANDROID_HVPROTO=ddm
 ```
 
-在文件```/etc/profile中设置
+在文件```/etc/profile```中设置
