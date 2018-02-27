@@ -1,18 +1,15 @@
 # 状态模式
 
 
-#### 抽象状态
+
 ```
-//定义和Context中的状态相对应的行为
+// 抽象状态
 public interface State {
     //获取天气情况
     String getState();
 }
-```
 
-#### 上下文，依赖于状态
-```
-//定义当前的状态
+// 上下文，依赖于状态
 public class Context {
  
     private State state;
@@ -28,10 +25,8 @@ public class Context {
         return state.getState();
     }
 }
-```
 
-#### 具体状态
-```
+// 具体状态
 class Sunshine implements State{
  
      @Override
@@ -49,10 +44,8 @@ class Rain implements State{
     }
      
 }
-```
 
-#### 客户端
-```
+// 客户端
 public class StateTest {
     public static void main(String args[]){
         Context context=new Context();
@@ -492,5 +485,6 @@ public class DecoratorPatternDemo {
 ```
 
 装饰者模式和适配器模式的区别：
-装饰者模式是方法的递进，补充
-适配器模式是方法的转换
+
+- 装饰者模式是方法的递进，补充
+- 适配器模式是方法的转换
