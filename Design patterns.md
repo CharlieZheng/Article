@@ -417,3 +417,80 @@ public class Clienter {
 
 }
 ```
+# 装饰模式
+```
+public interface Shape {
+   void draw();
+}
+
+public class Rectangle implements Shape {
+
+   @Override
+   public void draw() {
+      System.out.println("Shape: Rectangle");
+   }
+}
+
+public class Circle implements Shape {
+
+   @Override
+   public void draw() {
+      System.out.println("Shape: Circle");
+   }
+}
+
+// 抽象装饰类，这个角色也很没必要，客户端代码不依赖它，可以省略
+public abstract class ShapeDecorator implements Shape {
+   protected Shape decoratedShape;
+
+   public ShapeDecorator(Shape decoratedShape){
+      this.decoratedShape = decoratedShape;
+   }
+   // 这个方法很没必要
+   public void draw(){
+      decoratedShape.draw();
+   }    
+}
+
+// 具体装饰类
+public class RedShapeDecorator extends ShapeDecorator {
+
+   public RedShapeDecorator(Shape decoratedShape) {
+      super(decoratedShape);        
+   }
+
+   @Override
+   public void draw() {
+      decoratedShape.draw();           
+      setRedBorder(decoratedShape);
+   }
+
+   private void setRedBorder(Shape decoratedShape){
+      System.out.println("Border Color: Red");
+   }
+}
+
+
+public class DecoratorPatternDemo {
+   public static void main(String[] args) {
+
+      Shape circle = new Circle();
+
+      Shape redCircle = new RedShapeDecorator(new Circle());
+
+      Shape redRectangle = new RedShapeDecorator(new Rectangle());
+      System.out.println("Circle with normal border");
+      circle.draw();
+
+      System.out.println("\nCircle of red border");
+      redCircle.draw();
+
+      System.out.println("\nRectangle of red border");
+      redRectangle.draw();
+   }
+}
+```
+
+装饰者模式和适配器模式的区别：
+装饰者模式是方法的递进，补充
+适配器模式是方法的转换
