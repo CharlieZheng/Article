@@ -678,3 +678,97 @@ public class App {
     }
 }
 ```
+# 桥接模式
+
+```
+// 首先定义电视机的接口：ITV
+public interface ITV {
+    public void on();
+    public void off();
+    public void switchChannel(int channel);
+}
+
+// 实现三星的 ITV 接口
+public class SamsungTV implements ITV {
+    @Override
+    public void on() {
+        System.out.println("Samsung is turned on.");
+    }
+ 
+    @Override
+    public void off() {
+        System.out.println("Samsung is turned off.");
+    }
+ 
+    @Override
+    public void switchChannel(int channel) {
+        System.out.println("Samsung: channel - " + channel);
+    }
+}
+
+// 再实现索尼的ITV接口
+public class SonyTV implements ITV {
+ 
+    @Override
+    public void on() {
+        System.out.println("Sony is turned on.");
+    }
+ 
+    @Override
+    public void off() {
+        System.out.println("Sony is turned off.");
+    }
+ 
+    @Override
+    public void switchChannel(int channel) {
+        System.out.println("Sony: channel - " + channel);
+    }
+}
+
+// 遥控器要包含对TV的引用
+public abstract class AbstractRemoteControl {
+    /**
+     * @uml.property  name="tv"
+     * @uml.associationEnd  
+     */
+    private ITV tv;
+ 
+    public AbstractRemoteControl(ITV tv){
+        this.tv = tv;
+    }
+ 
+    public void turnOn(){
+        tv.on();
+    }
+ 
+    public void turnOff(){
+        tv.off();
+    }
+ 
+    public void setChannel(int channel){
+        tv.switchChannel(channel);
+    }
+}
+
+// 定义遥控器的具体类
+public class LogitechRemoteControl extends AbstractRemoteControl {
+ 
+    public LogitechRemoteControl(ITV tv) {
+        super(tv);
+    }
+ 
+    public void setChannelKeyboard(int channel){
+        setChannel(channel);
+        System.out.println("Logitech use keyword to set channel.");
+    }
+}
+
+public class Main {
+    public static void main(String[] args){
+        ITV tv = new SonyTV();
+        LogitechRemoteControl lrc = new LogitechRemoteControl(tv);
+        lrc.setChannelKeyboard(100);    
+    }
+}
+```
+上面的遥控器具体类不知道起什么作用。这个模式很简单，都算不上是一个模式。
