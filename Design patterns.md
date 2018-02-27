@@ -1,7 +1,7 @@
 # 状态模式
 
 
-## 抽象状态
+#### 抽象状态
 ```
 //定义和Context中的状态相对应的行为
 public interface State {
@@ -10,7 +10,7 @@ public interface State {
 }
 ```
 
-## 上下文，依赖于状态
+#### 上下文，依赖于状态
 ```
 //定义当前的状态
 public class Context {
@@ -30,7 +30,7 @@ public class Context {
 }
 ```
 
-## 具体状态
+#### 具体状态
 ```
 class Sunshine implements State{
  
@@ -51,7 +51,7 @@ class Rain implements State{
 }
 ```
 
-## 客户端
+#### 客户端
 ```
 public class StateTest {
     public static void main(String args[]){
@@ -269,6 +269,8 @@ public class User implements Observer {
 }
 
 ```
+
+```
 package com.jstao.observer;
 
 public class Test {
@@ -292,4 +294,126 @@ public class Test {
     }
 }
 ```
+
+# 适配器模式
+
+#### 类适配器模式
+```
+public interface Ps2 {
+    void isPs2();
+}
+
+public interface Usb {
+    void isUsb();
+}
+
+public class Usber implements Usb {
+ 
+    @Override
+    public void isUsb() {
+        System.out.println("USB口");
+    }
+ 
+}
+
+public class Adapter extends Usber implements Ps2 {
+ 
+    @Override
+    public void isPs2() {
+        isUsb();
+    }
+ 
+}
+
+public class Clienter {
+ 
+    public static void main(String[] args) {
+        Ps2 p = new Adapter();
+        p.isPs2();
+    }
+ 
+}
+```
+#### 对象适配器模式
+```
+public interface Ps2 {
+    void isPs2();
+}
+
+public interface Usb {
+    void isUsb();
+}
+
+public class Usber implements Usb {
+ 
+    @Override
+    public void isUsb() {
+        System.out.println("USB口");
+    }
+ 
+}
+
+public class Adapter implements Ps2 {
+    
+    private Usb usb;
+    public Adapter(Usb usb){
+        this.usb = usb;
+    }
+    @Override
+    public void isPs2() {
+        usb.isUsb();
+    }
+
+}
+
+public class Clienter {
+
+    public static void main(String[] args) {
+        Ps2 p = new Adapter(new Usber());
+        p.isPs2();
+    }
+ 
+}
+```
+
+可以看到，对象适配器模式比类适配器模式更灵活，需要哪种适配器则传递目标对象到适配器中去。
+#### 接口适配器模式
+[当存在这样一个接口，其中定义了N多的方法，而我们现在却只想使用其中的一个到几个方法，如果我们直接实现接口，那么我们要对所有的方法进行实现，哪怕我们仅仅是对不需要的方法进行置空（只写一对大括号，不做具体方法实现）也会导致这个类变得臃肿，调用也不方便。这时我们可以使用一个抽象类作为中间件，即适配器，用这个抽象类实现接口，而在抽象类中所有的方法都进行置空，那么我们在创建抽象类的继承类，而且重写我们需要使用的那几个方法即可。](https://www.cnblogs.com/V1haoge/p/6479118.html)
+```
+public interface A {
+    void a();
+    void b();
+    void c();
+    void d();
+    void e();
+    void f();
+}
+
+public abstract class Adapter implements A {
+    public void a(){}
+    public void b(){}
+    public void c(){}
+    public void d(){}
+    public void e(){}
+    public void f(){}
+}
+
+public class Ashili extends Adapter {
+    public void a(){
+        System.out.println("实现A方法被调用");
+    }
+    public void d(){
+        System.out.println("实现d方法被调用");
+    }
+}
+
+public class Clienter {
+ 
+    public static void main(String[] args) {
+        A a = new Ashili();
+        a.a();
+        a.d();
+    }
+
+}
 ```
