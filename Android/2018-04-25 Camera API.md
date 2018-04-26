@@ -552,8 +552,9 @@ Camera.Parameters params = mCamera.getParameters();
 
 if (params.getMaxNumMeteringAreas() > 0){ // check that metering areas are supported
     List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
-
-    Rect areaRect1 = new Rect(-100, -100, 100, 100);    // specify an area in center of image
+    // 这里 Rect 里传入的几个参数代表预览界面的区域见下图
+    // 预览界面的宽是 -1000 到 1000，高也一样
+    Rect areaRect1 = new Rect(-100, -100, 100, 100);    // specify an area in center of image
     meteringAreas.add(new Camera.Area(areaRect1, 600)); // set weight to 60%
     Rect areaRect2 = new Rect(800, -1000, 1000, -800);  // specify an area in upper right of image
     meteringAreas.add(new Camera.Area(areaRect2, 400)); // set weight to 40%
@@ -566,3 +567,102 @@ mCamera.setParameters(params);
 ![img](./camera-area-coordinates.png)
 ##### 面部检测
 
+Android 4.0（API Level 14）及以上的 SDK 提供面部识别的 API
+当面部识别的功能正在运行时
+ - ```setWhiteBalance(String)```
+ - ```setFocusAreas(List<Camera.Area>)```
+ - ```setMeteringAreas(List<Camera.Area>)```
+以上的三个方法将失效
+使用面部识别特性一般需要一下几个步骤：
+1. 检查是否支持
+2. 创建一个监听器
+3. 把监听器 set 给 Camera
+4. 当预览生效的时候开始面部识别
+
+使用 getMaxNumDetectedFaces() 可以检测是否支持面部检测
+第 2、3步对应代码：
+```
+class MyFaceDetectionListener implements Camera.FaceDetectionListener {
+
+    @Override
+    public void onFaceDetection(Face[] faces, Camera camera) {
+        if (faces.length > 0){
+            Log.d("FaceDetection", "face detected: "+ faces.length +
+                    " Face 1 Location X: " + faces[0].rect.centerX() +
+                    "Y: " + faces[0].rect.centerY() );
+        }
+    }
+}
+mCamera.setFaceDetectionListener(new MyFaceDetectionListener());
+```
+第 4 步对应代码：
+```
+public void startFaceDetection(){
+    // Try starting Face Detection
+    Camera.Parameters params = mCamera.getParameters();
+
+    // start face detection only *after* preview has started
+    if (params.getMaxNumDetectedFaces() > 0){
+        // camera supports face detection, so can start it:
+        mCamera.startFaceDetection();
+    }
+}
+```
+```
+public void surfaceCreated(SurfaceHolder holder) {
+    try {
+        mCamera.setPreviewDisplay(holder);
+        mCamera.startPreview();
+
+        startFaceDetection(); // start face detection feature
+
+    } catch (IOException e) {
+        Log.d(TAG, "Error setting camera preview: " + e.getMessage());
+    }
+}
+
+public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+
+    if (mHolder.getSurface() == null){
+        // preview surface does not exist
+        Log.d(TAG, "mHolder.getSurface() == null");
+        return;
+    }
+
+    try {
+        mCamera.stopPreview();
+
+    } catch (Exception e){
+        // ignore: tried to stop a non-existent preview
+        Log.d(TAG, "Error stopping camera preview: " + e.getMessage());
+    }
+
+    try {
+        mCamera.setPreviewDisplay(mHolder);
+        mCamera.startPreview();
+
+        startFaceDetection(); // re-start face detection feature
+
+    } catch (Exception e){
+        // ignore: tried to stop a non-existent preview
+        Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+    }
+}
+```
+##### 延时摄影
+ - 设置
+1. 减少每秒捕获帧的数量
+2. 使用一个时间间隔质量设置
+
+```
+// Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
+mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_TIME_LAPSE_HIGH));
+...
+// Step 5.5: Set the video capture rate to a low number
+mMediaRecorder.setCaptureRate(0.1); // capture a frame every 10 seconds
+```
+
+[Sample1](https://github.com/googlesamples/android-Camera2Video/)
+[Sample2](https://github.com/googlesamples/android-HdrViewfinder/)
+[Sample3](https://github.com/googlesamples/android-Camera2Basic/)
+[Sample4](https://github.com/googlesamples/android-Camera2Raw/)
