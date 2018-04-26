@@ -293,4 +293,274 @@ Android 4.0（API Level 14）及以上会自动为您管理 Camera.lock() 和 Ca
             1. 设置输出格式 ```setOutputFormat()```
             2. 设置音频编码 ```setAudioEncoder()```
             3. 设置视频编码 ```setVideoEncoder()```
-        5. 
+        5. 设置输出到哪个文件 ```setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).toString())```
+        6. 指定预览的布局节点，使用在第 2 步（连接预览）中的对象 ```setPreviewDisplay()```
+    3. 准备 MediaRecorder ```MediaRecorder.prepare()```
+    4. 开始 MediaRecorder ```MediaRecorder.start()```
+5. 停止视频录制
+    1. 停止 MediaRecorder ```MediaRecorder.stop()```
+    2. 可选的操作，重置 MediaRecorder ```MediaRecorder.reset()```
+    3. 释放 MediaRecorder ```MediaRecorder.release()```
+    4. 锁住 Camera ```Camera.lock()```，这一步在 Android 4.0（API level 14）及以上是可选的，除非 MediaRecorder.prepare() 失败
+6. 停止预览 ```Camera.stopPreview()```
+7. 释放 Camera ```Camera.release()```
+
+不开预览也可以进行视频录制，此处不讨论
+
+如果你的应用通常被用来视频录制，可以在开始预览之前调用 ```setRecordingHint(true)```
+来减少启动录制的时间
+
+#### 配置 MediaRecorder
+```
+private boolean prepareVideoRecorder(){
+
+    mCamera = getCameraInstance();
+    mMediaRecorder = new MediaRecorder();
+
+    // Step 1: Unlock and set camera to MediaRecorder
+    mCamera.unlock();
+    mMediaRecorder.setCamera(mCamera);
+
+    // Step 2: Set sources
+    mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+    mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+
+    // Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
+    mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+
+    // Step 4: Set output file
+    mMediaRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).toString());
+
+    // Step 5: Set the preview output
+    mMediaRecorder.setPreviewDisplay(mPreview.getHolder().getSurface());
+
+    // Step 6: Prepare configured MediaRecorder
+    try {
+        mMediaRecorder.prepare();
+    } catch (IllegalStateException e) {
+        Log.d(TAG, "IllegalStateException preparing MediaRecorder: " + e.getMessage());
+        releaseMediaRecorder();
+        return false;
+    } catch (IOException e) {
+        Log.d(TAG, "IOException preparing MediaRecorder: " + e.getMessage());
+        releaseMediaRecorder();
+        return false;
+    }
+    return true;
+}
+```
+在 Android 2.2（API Level 8）之前使用下面的代码设置输出格式和编码格式
+```
+    // Step 3: Set output format and encoding (for versions prior to API Level 8)
+    mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+    mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+    mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
+```
+
+下面这些设置一般保持默认就可以了
+```
+setVideoEncodingBitRate()
+setVideoSize()
+setVideoFrameRate()
+setAudioEncodingBitRate()
+setAudioChannels()
+setAudioSamplingRate()
+```
+
+#### 开始和停止 MediaRecorder
+
+当进行这两步之前你必须遵循下面的特定步骤
+
+1. 解锁 Camera ```Camera.unlock()```
+2. 配置 MediaRecorder，参照上面一节
+3. 开始录制 ```MediaRecorder.start()```
+4. 录制
+5. 停止录制 ```MediaRecorder.stop()```
+6. 释放 ```MediaRecorder.stop()```
+7. 锁住 Camera ```Camera.lock()```
+
+当完成录制后不要释放你的 Camera，否则你的预览将停止
+
+开始和停止录制
+```private boolean isRecording = false;
+
+// Add a listener to the Capture button
+Button captureButton = (Button) findViewById(id.button_capture);
+captureButton.setOnClickListener(
+    new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (isRecording) {
+                // stop recording and release camera
+                mMediaRecorder.stop();  // stop the recording
+                releaseMediaRecorder(); // release the MediaRecorder object
+                mCamera.lock();         // take camera access back from MediaRecorder
+
+                // inform the user that recording has stopped
+                setCaptureButtonText("Capture");
+                isRecording = false;
+            } else {
+                // initialize video camera
+                if (prepareVideoRecorder()) {
+                    // Camera is available and unlocked, MediaRecorder is prepared,
+                    // now you can start recording
+                    mMediaRecorder.start();
+
+                    // inform the user that recording has started
+                    setCaptureButtonText("Stop");
+                    isRecording = true;
+                } else {
+                    // prepare didn't work, release the camera
+                    releaseMediaRecorder();
+                    // inform user
+                }
+            }
+        }
+    }
+);
+```
+
+#### 释放相机
+
+```
+public class CameraActivity extends Activity {
+    private Camera mCamera;
+    private SurfaceView mPreview;
+    private MediaRecorder mMediaRecorder;
+
+    ...
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        releaseMediaRecorder();       // if you are using MediaRecorder, release it first
+        releaseCamera();              // release the camera immediately on pause event
+    }
+
+    private void releaseMediaRecorder(){
+        if (mMediaRecorder != null) {
+            mMediaRecorder.reset();   // clear recorder configuration
+            mMediaRecorder.release(); // release the recorder object
+            mMediaRecorder = null;
+            mCamera.lock();           // lock camera for later use
+        }
+    }
+
+    private void releaseCamera(){
+        if (mCamera != null){
+            mCamera.release();        // release the camera for other applications
+            mCamera = null;
+        }
+    }
+}
+```
+#### 保存媒体文件
+
+很多路径可以存储这些文件，而开发者应该考虑的只能是下面的两种标准路径
+1. Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+  这个接口在 Android 2.2（API Level 8）及以上提供，在老版本中使用 ```Environment.getExternalStorageDirectory()```
+2. Context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+  当你的应用被卸载的时候，这些文件也会被清楚。其它应用可以访问到该路径下的文件。
+  
+```
+public static final int MEDIA_TYPE_IMAGE = 1;
+public static final int MEDIA_TYPE_VIDEO = 2;
+
+/** Create a file Uri for saving an image or video */
+private static Uri getOutputMediaFileUri(int type){
+      return Uri.fromFile(getOutputMediaFile(type));
+}
+
+/** Create a File for saving an image or video */
+private static File getOutputMediaFile(int type){
+    // To be safe, you should check that the SDCard is mounted
+    // using Environment.getExternalStorageState() before doing this.
+
+    File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+              Environment.DIRECTORY_PICTURES), "MyCameraApp");
+    // This location works best if you want the created images to be shared
+    // between applications and persist after your app has been uninstalled.
+
+    // Create the storage directory if it does not exist
+    if (! mediaStorageDir.exists()){
+        if (! mediaStorageDir.mkdirs()){
+            Log.d("MyCameraApp", "failed to create directory");
+            return null;
+        }
+    }
+
+    // Create a media file name
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    File mediaFile;
+    if (type == MEDIA_TYPE_IMAGE){
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+        "IMG_"+ timeStamp + ".jpg");
+    } else if(type == MEDIA_TYPE_VIDEO) {
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+        "VID_"+ timeStamp + ".mp4");
+    } else {
+        return null;
+    }
+
+    return mediaFile;
+}
+```
+
+无论是使用系统相机拍摄还是你自己的应用进行拍摄，存储媒体的功能都是上面的代码所能完成的
+
+要使 URI 支持工作概要文件，得先将文件 URI 转换为内容 URI，然后将内容 URI 添加到 Intent 的 EXTRA_OUTPUT 中
+
+#### 相机功能
+
+##### 检查功能是否可用
+下面的代码展示了检查相机是否支持自动对焦功能
+```
+// get Camera parameters
+Camera.Parameters params = mCamera.getParameters();
+
+List<String> focusModes = params.getSupportedFocusModes();
+if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+  // Autofocus mode is supported
+}
+```
+
+在清单文件中声明的一些相机特性如若设备无法提供的话，则那些设备安装不上这个 app，之前说会在 Google Play 上对这类设备不可见的说法应该是译者理解错误吧
+##### 使用功能
+```
+// get Camera parameters
+Camera.Parameters params = mCamera.getParameters();
+// set the focus mode
+params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+// set Camera parameters
+mCamera.setParameters(params);
+```
+有些功能参数不能随意改变
+
+相机预览的大小和方向需要先停止预览然后才可设置
+
+Android 4.0（API Level 14）及以上改变方向不需要重启预览
+
+##### 计量并对焦某区域
+
+ - 设置两个测光区域
+```
+// Create an instance of Camera
+mCamera = getCameraInstance();
+
+// set Camera parameters
+Camera.Parameters params = mCamera.getParameters();
+
+if (params.getMaxNumMeteringAreas() > 0){ // check that metering areas are supported
+    List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
+
+    Rect areaRect1 = new Rect(-100, -100, 100, 100);    // specify an area in center of image
+    meteringAreas.add(new Camera.Area(areaRect1, 600)); // set weight to 60%
+    Rect areaRect2 = new Rect(800, -1000, 1000, -800);  // specify an area in upper right of image
+    meteringAreas.add(new Camera.Area(areaRect2, 400)); // set weight to 40%
+    params.setMeteringAreas(meteringAreas);
+}
+
+mCamera.setParameters(params);
+```
+##### 面部检测
+
