@@ -563,6 +563,6 @@ if (params.getMaxNumMeteringAreas() > 0){ // check that metering areas are suppo
 mCamera.setParameters(params);
 ```
 
-[img](./camera-area-coordinates.png)
+![img](./camera-area-coordinates.png)
 ##### 面部检测
 
