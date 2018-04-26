@@ -280,6 +280,7 @@ Android 4.0（API Level 14）及以上会自动为您管理 Camera.lock() 和 Ca
 4. 开始录制视频
     1. 解锁 Camera ```Camera.unlock()```
     2. 配置 MediaRecorder
+    
       1. ```setCamera()```
       2. 设置音频源 ```setAudioSource()```
       3. 设置视频源 ```setVideoSource()```
