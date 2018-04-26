@@ -42,12 +42,12 @@ required="false" 表示非必需，Google Play 不会对没有相机功能的设
 为了程序看起来像个相机或者提供特殊的功能，有些开发者需要一个定制的相机 UI。
 
 开发步骤：
-1、检查并申请访问相机
-2、创建一个Preview（一个自定义SurfaceView）
-3、创建一个引用 Preview 的布局 Layout
-4、监听布局上的按钮
-5、拍照并保存
-6、释放相机
+1. 检查并申请访问相机
+2. 创建一个Preview（一个自定义SurfaceView）
+3. 创建一个引用 Preview 的布局 Layout
+4. 监听布局上的按钮
+5. 拍照并保存
+6. 释放相机
 #### 检测相机硬件
 没有在清单文件中声明需要使用相机功能的话
 需要动态检测设备是否具备该功能
@@ -274,19 +274,19 @@ MediaRecorder 得和 Camera 协调使用
 Android 4.0（API Level 14）及以上会自动为您管理 Camera.lock() 和 Camera.unlock() 的调用
 
 次序：
-1、打开摄像头 ```Camera.open()```
-2、连接预览，使用 ```Camera.setPreviewDisplay()``` 把摄像头和一个预览连接。拍照功能没用到这个接口
-3、开始预览 ```Camera.startPreview()```
-4、开始录制视频
-  1、解锁 Camera ```Camera.unlock()```
-  2、配置 MediaRecorder
-    1、```setCamera()```
-    2、设置音频源 ```setAudioSource()```
-    3、设置视频源 ```setVideoSource()```
-    4、设置视频输出格式和编码格式
+1. 打开摄像头 ```Camera.open()```
+2. 连接预览，使用 ```Camera.setPreviewDisplay()``` 把摄像头和一个预览连接。拍照功能没用到这个接口
+3. 开始预览 ```Camera.startPreview()```
+4. 开始录制视频
+  1. 解锁 Camera ```Camera.unlock()```
+  2. 配置 MediaRecorder
+    1. ```setCamera()```
+    2. 设置音频源 ```setAudioSource()```
+    3. 设置视频源 ```setVideoSource()```
+    4. 设置视频输出格式和编码格式
     在 Android 2.2（API Level 8）及之后的 SDK 版本中 ```MediaRecorder.setProfile(CamcorderProfile.get())```
     在之前的版本中：
-      1、设置输出格式 ```setOutputFormat()```
-      2、设置音频编码 ```setAudioEncoder()```
-      3、设置视频编码 ```setVideoEncoder()```
-    5、
+      1. 设置输出格式 ```setOutputFormat()```
+      2. 设置音频编码 ```setAudioEncoder()```
+      3. 设置视频编码 ```setVideoEncoder()```
+    5. 
