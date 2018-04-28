@@ -60,3 +60,6 @@ curl -sL facebook.com
 curl -sL twitter.com
 curl -sL www.wikipedia.org
 ```
+
+### 在 Android Studio 中的设置
+![](./2018-04-28 16-51-41 的屏幕截图.png)
