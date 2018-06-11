@@ -77,3 +77,7 @@ curl -sL www.wikipedia.org
 
 
 ![img](./截图.png)
+
+### 在Firefox中的设置
+
+![Firefox](./Screenshot from 2018-06-11 17-35-33.png)
