@@ -80,4 +80,4 @@ curl -sL www.wikipedia.org
 
 ### 在Firefox中的设置
 
-![Firefox]("./Screenshot from 2018-06-11 17-35-33.png")
+![Firefox](./2018-06-11.png)
