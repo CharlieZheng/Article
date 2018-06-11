@@ -1,4 +1,15 @@
 ### 浏览器
+
+[HERE](http://dcamero.azurewebsites.net/shadowsocksr.html#linux)
+
+```sudo apt-get install git python-m2crypto libsodium18```
+
+```cd ~/Downloads```
+
+```git clone -b manyuser https://github.com/shadowsocksrr/shadowsocksr.git```
+
+
+
 - startShadowsocks.sh
 ```
 cd ~/Downloads/shadowsocksr/shadowsocks/
