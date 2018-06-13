@@ -81,3 +81,7 @@ curl -sL www.wikipedia.org
 ### 在Firefox中的设置
 
 ![Firefox](./2018-06-11.png)
+
+### Ubuntu系统代理设置
+
+![system_proxy_config](./system_proxy_config.png)
