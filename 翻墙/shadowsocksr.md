@@ -72,6 +72,11 @@ curl -sL twitter.com
 curl -sL www.wikipedia.org
 ```
 
+### [终端2](https://blog.csdn.net/xjwangliang/article/details/78042740)
+```
+export http_proxy=socks5://127.0.0.1:1080
+export https_proxy=$http_proxy
+```
 ### 在 Android Studio 中的设置
 
 
